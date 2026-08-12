@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+.venv/
+venv/
+env/
+.env
+.conda/
+
+# FreeCAD
+*.FCStd
+*.FCStd1
+*.step
+*.stp
+*.stl
+*.obj
+!tests/fixtures/**
+
+# Exports & logs
+exports/
+logs/
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Testing
+.coverage
+.pytest_cache/
+htmlcov/
+.tox/
+
+# uv
+.uv/
+uv.lock
+
+# local
+Freecad-MCP-Plan.md
+AI Engineer Job posting.txt
+WATCHDOG.yml
+PROJECT_MEMORY.md
