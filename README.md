@@ -4,15 +4,16 @@ Hand-coded Python MCP server exposing parametric FreeCAD operations as LLM tools
 
 ## Project status
 
-**Stage: foundation complete — server under construction.**
+**Stage: server skeleton complete — tool implementations next.**
 
 - ✅ Repo hygiene: `.gitignore`, README
-- 🔜 `pyproject.toml` (content ready — pins MCP SDK)
-- 🔜 `.omp/mcp.json` placeholder (OMP harness config)
+- ✅ `pyproject.toml` — pins the MCP SDK (`mcp==1.29.0`), console script `freecad-mcp`
+- ✅ `.omp/mcp.json` placeholder (OMP harness config)
 - ✅ **Step 2 — FreeCAD headless spike: proven natively (macOS) and in a Docker container**
-- 🔜 Steps 3A+ — MCP server skeleton, six tools, OMP harness wiring, verification
+- ✅ **MCP server skeleton — official SDK, stdio transport** (`src/freecad_mcp/server.py`, pushed to GitHub)
+- 🔜 Six tools, OMP harness wiring, security hardening, verification
 
-The server code does not exist yet. This README documents the foundation and the environment decisions everything else builds on.
+The server speaks the MCP protocol over stdio but exposes no tools yet (`list_tools` returns an empty list). This README documents the foundation, the environment decisions everything else builds on, and the roadmap to a usable tool set.
 
 ## Architecture
 
@@ -25,7 +26,7 @@ The server code does not exist yet. This README documents the foundation and the
 - Docker Desktop (any platform) — server and FreeCAD live in the image.
 - Python ≥ 3.10 locally (for server development and tests).
 
-## Quick start (current stage: spike verification)
+## Quick start
 
 ```bash
 # Build the dev image (Debian bookworm, FreeCAD 0.20.2, Python 3.11 venv, MCP SDK)
@@ -36,7 +37,14 @@ docker run --rm freecad-mcp app_env/bin/python -c "import FreeCAD; print(FreeCAD
 
 # Headless pipeline smoke: document → box → recompute → export STEP
 docker run --rm freecad-mcp app_env/bin/python -c "import FreeCAD, Part; doc=FreeCAD.newDocument('t'); Part.show(Part.makeBox(10,10,10),'Box'); doc.recompute(); Part.export([doc.Objects[0]], '/tmp/t.step'); print('ok')"
+
+# Run the MCP server (stdio) from a local checkout
+python -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]"
+freecad-mcp            # or: python -m freecad_mcp.server
 ```
+
+The dev image currently installs the MCP SDK but not the `freecad-mcp` package itself; installing it into the image is part of the harness-wiring roadmap item below.
 
 ## Known quirks (hard-won)
 
@@ -48,9 +56,9 @@ docker run --rm freecad-mcp app_env/bin/python -c "import FreeCAD, Part; doc=Fre
 ## Roadmap
 
 - [x] `.gitignore`, README
-- [ ] `pyproject.toml` — Python ≥ 3.10, MCP SDK pinned (stable 1.x, spec 2025-06-18)
-- [ ] `.omp/mcp.json` placeholder
-- [ ] MCP server skeleton (official SDK, stdio first) — `src/freecad_mcp/server.py`
+- [x] `pyproject.toml` — Python ≥ 3.10, MCP SDK pinned (`mcp==1.29.0`)
+- [x] `.omp/mcp.json` placeholder
+- [x] MCP server skeleton (official SDK, stdio first) — `src/freecad_mcp/server.py`
 - [ ] Six tools: `create_document`, `create_primitive`, `execute_python`, `export_model`, `list_objects`, `get_object`
 - [ ] OMP harness wiring + verification (`/mcp list`, `/mcp test freecad`)
 - [ ] Security hardening (sandboxed `execute_python`, export path guards, doc limits)
