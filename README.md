@@ -4,7 +4,7 @@ Hand-coded Python MCP server exposing parametric FreeCAD operations as LLM tools
 
 ## Project status
 
-**Stage: first tool implemented and container-verified — five tools to go.**
+**Stage: two tools implemented and container-verified — four to go.**
 
 - ✅ Repo hygiene: `.gitignore`, README
 - ✅ `pyproject.toml` — pins the MCP SDK (`mcp==1.29.0`), console script `freecad-mcp`
@@ -12,17 +12,19 @@ Hand-coded Python MCP server exposing parametric FreeCAD operations as LLM tools
 - ✅ **Step 2 — FreeCAD headless spike: proven natively (macOS) and in a Docker container**
 - ✅ **MCP server skeleton — official SDK, stdio transport** (`src/freecad_mcp/server.py`)
 - ✅ **Step 4 — `create_document` tool: schema-validated, lazy FreeCAD import, duplicate-name rejection, verified end-to-end in the container** (see [Tools](#tools))
-- 🔜 Five more tools, OMP harness wiring, security hardening, verification
+- ✅ **Step 4 — `create_primitive` tool: per-type dimension validation, missing-doc rejection, position placement, verified end-to-end in the container** (see [Tools](#tools))
+- 🔜 Four more tools, OMP harness wiring, security hardening, verification
 
-The server speaks the MCP protocol over stdio and currently exposes one working tool (`create_document`). This README documents the foundation, the environment decisions everything else builds on, and the roadmap to a usable tool set.
+The server speaks the MCP protocol over stdio and currently exposes two working tools (`create_document`, `create_primitive`). This README documents the foundation, the environment decisions everything else builds on, and the roadmap to a usable tool set.
 
 ## Tools
 
 | Tool | Status | Behavior |
 |---|---|---|
 | `create_document` | ✅ Verified in container | Creates a FreeCAD document. Rejects empty/whitespace names via JSON Schema (`minLength: 1`) before the handler runs; rejects duplicate names with an `isError` result (verified: FreeCAD silently renames `X` → `X1` on a second `newDocument` call, so the pre-check is required to keep tool output honest). |
+| `create_primitive` | ✅ Verified in container | Adds a `Part::Box`, `Part::Cylinder`, or `Part::Sphere` to a named document. Negative dimensions rejected by the schema (`exclusiveMinimum: 0`) before the handler runs; per-type required fields checked in the handler (`box`→length/width/height, `cylinder`→radius/height, `sphere`→radius); missing document → `isError`; optional `position` applies a `Placement`. |
 
-Remaining planned: `create_primitive`, `execute_python`, `export_model`, `list_objects`, `get_object`.
+Remaining planned: `execute_python`, `export_model`, `list_objects`, `get_object`.
 
 ## Architecture
 
@@ -71,7 +73,8 @@ The dev image currently installs the MCP SDK but not the `freecad-mcp` package i
 - [x] `.omp/mcp.json` placeholder
 - [x] MCP server skeleton (official SDK, stdio first) — `src/freecad_mcp/server.py`
 - [x] `create_document` tool (schema-validated, duplicate-name rejection) — container-verified
-- [ ] Five more tools: `create_primitive`, `execute_python`, `export_model`, `list_objects`, `get_object`
+- [x] `create_primitive` tool (per-type dims, missing-doc rejection, position placement) — container-verified
+- [ ] Four more tools: `execute_python`, `export_model`, `list_objects`, `get_object`
 - [ ] OMP harness wiring + verification (`/mcp list`, `/mcp test freecad`)
 - [ ] Security hardening (sandboxed `execute_python`, export path guards, doc limits)
 - [ ] Verification: MCP Inspector, Claude Desktop, OMP harness; pytest; CI

@@ -52,7 +52,10 @@ AI Engineer Job posting.txt
 WATCHDOG.yml
 PROJECT_MEMORY.md
 LESSONS.md
+DECISIONS.md
+FREECAD_API.md
 
 # teaching/learner state (private)
 .keating/
 keating.config.json
+.agents/
